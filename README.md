@@ -74,4 +74,5 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 ## Contact
 
 [archways](mailto:archways@gmx.us)
-[Git repository](https://github.com/archways404/GhostHost)
+
+[Git](https://github.com/archways404/GhostHost)
