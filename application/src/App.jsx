@@ -11,7 +11,7 @@ function App() {
 
 	const onDrop = useCallback((acceptedFiles) => {
 		const newFiles = acceptedFiles.map((file) => ({
-			path: file.path,
+			path: file.path || file.name, // Use file.name as fallback
 			name: file.name,
 			size: file.size,
 		}));
@@ -61,6 +61,10 @@ function App() {
 			});
 	};
 
+	const handleRemoveFile = (filePath) => {
+		setFiles((prevFiles) => prevFiles.filter((file) => file.path !== filePath));
+	};
+
 	return (
 		<div className="App">
 			<h1>File Upload</h1>
@@ -86,6 +90,10 @@ function App() {
 								: 'Size not available'}
 							<br />
 							Full Path: {file.path}
+							<button onClick={() => handleRemoveFile(file.path)}>
+								Remove
+							</button>{' '}
+							{/* Remove button */}
 						</li>
 					))}
 				</ul>
