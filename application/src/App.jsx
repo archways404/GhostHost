@@ -7,6 +7,7 @@ function App() {
 	const [files, setFiles] = useState([]);
 	const [responseTitle, setResponseTitle] = useState('');
 	const [rebuildTitle, setRebuildTitle] = useState('');
+	const [statusMessage, setStatusMessage] = useState(''); // State for status messages
 
 	const onDrop = useCallback((acceptedFiles) => {
 		const newFiles = acceptedFiles.map((file) => ({
@@ -22,12 +23,17 @@ function App() {
 	const handleUpload = () => {
 		const filePaths = files.map((file) => file.path);
 		console.log(filePaths); // Log file paths to verify
+		setStatusMessage('Uploading files...'); // Set status message before uploading
 		invoke('process_files', { filePaths })
 			.then((response) => {
 				console.log(response);
 				setResponseTitle(response);
+				setStatusMessage('Files uploaded successfully!'); // Set status message after successful upload
 			})
-			.catch((error) => console.error(error));
+			.catch((error) => {
+				console.error(error);
+				setStatusMessage('Failed to upload files.'); // Set status message in case of error
+			});
 	};
 
 	const handleSelectFiles = async () => {
@@ -43,11 +49,16 @@ function App() {
 	};
 
 	const handleRebuild = () => {
+		setStatusMessage('Rebuilding files...'); // Set status message before rebuilding
 		invoke('rebuild_files', { title: rebuildTitle })
 			.then(() => {
 				console.log(`Rebuilding files for title: ${rebuildTitle}`);
+				setStatusMessage('Files rebuilt successfully!'); // Set status message after successful rebuild
 			})
-			.catch((error) => console.error(error));
+			.catch((error) => {
+				console.error(error);
+				setStatusMessage('Failed to rebuild files.'); // Set status message in case of error
+			});
 	};
 
 	return (
@@ -100,6 +111,12 @@ function App() {
 				/>
 				<button onClick={handleRebuild}>Rebuild Files</button>
 			</div>
+			{statusMessage && (
+				<div>
+					<h2>Status</h2>
+					<p>{statusMessage}</p>
+				</div>
+			)}
 		</div>
 	);
 }
