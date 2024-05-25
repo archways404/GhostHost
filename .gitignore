@@ -1,0 +1,13 @@
+
+/testing/PoC/node_modules
+/testing/Performance/target
+testing/PoC/package-lock.json
+testing/PoC/output/response.json
+testing/PoC/output/new_video.mp4
+testing/PoC/output/combined_video.mp4
+testing/Performance/Cargo.lock
+application/src-tauri/response_text.json
+application/src-tauri/history.json
+application/src-tauri/file_data.json
+application/src-tauri/Cargo.lock
+application/package-lock.json

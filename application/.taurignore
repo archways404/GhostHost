@@ -1,0 +1,7 @@
+src-tauri/chunk_*.txt
+src-tauri/response_*.json
+src-tauri/*.mp4
+src-tauri/*.jpg
+src-tauri/response_text.json
+src-tauri/history.json
+src-tauri/*.json

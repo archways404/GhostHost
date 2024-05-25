@@ -1,0 +1,9 @@
+"-1" = forever
+
+"10m" = 10 minutes
+
+"1h" = 1 hour
+
+"1d" = 1 day
+
+"14d" = 14 days (2 weeks)
