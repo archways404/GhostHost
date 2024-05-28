@@ -18,6 +18,7 @@ function App() {
 
 	const renderHomeScreen = () => (
 		<div className="home-screen">
+			<h1 className="cool-title">GhostHost</h1>
 			<button onClick={() => setView('upload')}>Upload File(s)</button>
 			<button onClick={() => setView('rebuild')}>Rebuild File(s)</button>
 		</div>
