@@ -3,7 +3,7 @@
 use tauri::{command, Builder, generate_context, generate_handler};
 use std::collections::HashMap;
 use std::fs::{self, File};
-use std::io::Write;
+use std::io::{Read, Write};
 use std::path::PathBuf;
 use std::sync::{Arc, mpsc::{channel, Sender, Receiver}};
 use base64::{encode, decode};
@@ -293,7 +293,6 @@ async fn download_and_rebuild_files(title: String) -> Result<(), String> {
     Ok(())
 }
 
-
 #[command]
 async fn process_files(file_paths: Vec<String>) -> Result<String, String> {
     let mut all_files: HashMap<String, Vec<serde_json::Value>> = HashMap::new();
@@ -330,10 +329,20 @@ async fn rebuild_files(title: String) -> Result<(), String> {
     download_and_rebuild_files(title).await
 }
 
+// New endpoint to serve history.json
+#[command]
+async fn get_history() -> Result<String, String> {
+    let history_path = PathBuf::from("history.json");
+    let mut file = File::open(&history_path).map_err(|e| e.to_string())?;
+    let mut contents = String::new();
+    file.read_to_string(&mut contents).map_err(|e| e.to_string())?;
+    Ok(contents)
+}
+
 fn main() {
     let _rt = Runtime::new().unwrap();
     Builder::default()
-        .invoke_handler(generate_handler![process_files, rebuild_files])
+        .invoke_handler(generate_handler![process_files, rebuild_files, get_history])
         .run(generate_context!())
         .expect("error while running tauri application");
 }
