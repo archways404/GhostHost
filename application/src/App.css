@@ -47,6 +47,24 @@ input[type='text'] {
   margin-right: 10px;
 }
 
+select {
+  background-color: #444;
+  color: white;
+  border: none;
+  padding: 10px;
+  margin: 5px;
+  cursor: pointer;
+}
+
+select:hover {
+  background-color: #555;
+}
+
+option {
+  background-color: #444;
+  color: white;
+}
+
 ul {
   list-style-type: none;
   padding: 0;
@@ -137,4 +155,9 @@ li button {
   background-color: transparent;
   margin: 0;
   padding: 0;
+}
+
+.expired {
+  opacity: 0.6;
+  pointer-events: none;
 }

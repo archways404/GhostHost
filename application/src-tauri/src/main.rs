@@ -15,7 +15,7 @@ use futures::future::join_all;
 use tempfile::NamedTempFile;
 use dirs;
 use html_escape::decode_html_entities;
-use chrono::Utc;
+use chrono::{DateTime, Duration, Utc, FixedOffset};
 
 const CHUNK_SIZE: usize = 1 * 1024 * 1024; // 1MB
 
@@ -205,6 +205,20 @@ fn update_history(title: &str, file_names: Vec<String>, expiration: String) -> R
     fs::write(history_file, history_json).map_err(|e| e.to_string())?;
 
     Ok(())
+}
+
+fn calculate_expiration_time(timestamp: &str, expiration: &str) -> Result<DateTime<Utc>, String> {
+    let timestamp = DateTime::parse_from_rfc3339(timestamp).map_err(|e| e.to_string())?;
+    let duration = match expiration {
+        "-1" => Duration::seconds(i64::MAX),
+        "10m" => Duration::minutes(10),
+        "1h" => Duration::hours(1),
+        "1d" => Duration::days(1),
+        "14d" => Duration::days(14),
+        _ => return Err("Invalid expiration format".to_string()),
+    };
+
+    Ok((timestamp + duration).into())
 }
 
 async fn download_json(client: Arc<Client>, url: &str) -> Result<String, String> {

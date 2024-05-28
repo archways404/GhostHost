@@ -9,6 +9,7 @@ function UploadButton({ files, setResponseTitle, setStatusMessage }) {
 		setStatusMessage('Uploading files...');
 		invoke('process_files', { filePaths, expiration })
 			.then((response) => {
+				console.log(response);
 				setResponseTitle(response);
 				setStatusMessage('Files uploaded successfully!');
 			})
