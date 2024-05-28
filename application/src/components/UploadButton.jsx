@@ -1,29 +1,40 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { invoke } from '@tauri-apps/api/tauri';
 
 function UploadButton({ files, setResponseTitle, setStatusMessage }) {
+	const [expiration, setExpiration] = useState('-1'); // Default to 'forever'
+
 	const handleUpload = () => {
 		const filePaths = files.map((file) => file.path);
-		console.log(filePaths); // Log file paths to verify
-		setStatusMessage('Uploading files...'); // Set status message before uploading
-		invoke('process_files', { filePaths })
+		setStatusMessage('Uploading files...');
+		invoke('process_files', { filePaths, expiration })
 			.then((response) => {
-				console.log(response);
 				setResponseTitle(response);
-				setStatusMessage('Files uploaded successfully!'); // Set status message after successful upload
+				setStatusMessage('Files uploaded successfully!');
 			})
 			.catch((error) => {
 				console.error(error);
-				setStatusMessage('Failed to upload files.'); // Set status message in case of error
+				setStatusMessage('Failed to upload files.');
 			});
 	};
 
 	return (
-		<button
-			onClick={handleUpload}
-			style={{ marginTop: '20px', padding: '10px 20px' }}>
-			Upload Files
-		</button>
+		<div>
+			<div>
+				<label htmlFor="expiration">Select Expiration Time:</label>
+				<select
+					id="expiration"
+					value={expiration}
+					onChange={(e) => setExpiration(e.target.value)}>
+					<option value="-1">Forever</option>
+					<option value="10m">10 Minutes</option>
+					<option value="1h">1 Hour</option>
+					<option value="1d">1 Day</option>
+					<option value="14d">14 Days</option>
+				</select>
+			</div>
+			<button onClick={handleUpload}>Upload Files</button>
+		</div>
 	);
 }
 
