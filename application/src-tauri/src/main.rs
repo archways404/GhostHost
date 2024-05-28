@@ -28,6 +28,12 @@ struct PartData {
 }
 
 #[derive(Serialize, Deserialize)]
+struct FileMetadata {
+    name: String,
+    size: u64,
+}
+
+#[derive(Serialize, Deserialize)]
 struct FilePart {
     title: String,
 }
@@ -339,10 +345,27 @@ async fn get_history() -> Result<String, String> {
     Ok(contents)
 }
 
+#[command]
+fn get_file_metadata(file_path: String) -> Result<FileMetadata, String> {
+    let metadata = std::fs::metadata(&file_path).map_err(|e| e.to_string())?;
+    let file_size = metadata.len();
+    let file_name = std::path::Path::new(&file_path)
+        .file_name()
+        .and_then(|name| name.to_str())
+        .ok_or("Failed to get file name")?
+        .to_string();
+    Ok(FileMetadata { name: file_name, size: file_size })
+}
+
 fn main() {
     let _rt = Runtime::new().unwrap();
     Builder::default()
-        .invoke_handler(generate_handler![process_files, rebuild_files, get_history])
+        .invoke_handler(generate_handler![
+            process_files,
+            rebuild_files,
+            get_history,
+            get_file_metadata
+        ])
         .run(generate_context!())
         .expect("error while running tauri application");
 }
