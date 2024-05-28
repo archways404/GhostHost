@@ -3,7 +3,7 @@
 use tauri::{command, Builder, generate_context, generate_handler};
 use std::collections::HashMap;
 use std::fs::{self, File};
-use std::io::Write;
+use std::io::{Read, Write};
 use std::path::PathBuf;
 use std::sync::{Arc, mpsc::{channel, Sender, Receiver}};
 use base64::{encode, decode};
@@ -15,6 +15,7 @@ use futures::future::join_all;
 use tempfile::NamedTempFile;
 use dirs;
 use html_escape::decode_html_entities;
+use chrono::{DateTime, Duration, Utc, FixedOffset};
 
 const CHUNK_SIZE: usize = 1 * 1024 * 1024; // 1MB
 
@@ -37,7 +38,13 @@ struct PartLink {
     part: String,
 }
 
-async fn upload_part(client: Arc<Client>, part_path: String, tx: Sender<(usize, String)>, index: usize) {
+#[derive(Serialize, Deserialize)]
+struct FileMetadata {
+    name: String,
+    size: u64,
+}
+
+async fn upload_part(client: Arc<Client>, part_path: String, tx: Sender<(usize, String)>, index: usize, expiration: String) {
     let part_content = match fs::read_to_string(&part_path) {
         Ok(content) => content,
         Err(e) => {
@@ -48,7 +55,7 @@ async fn upload_part(client: Arc<Client>, part_path: String, tx: Sender<(usize, 
     let data = PartData {
         lang: "text".to_string(),
         text: part_content.clone(),
-        expire: "1h".to_string(),
+        expire: expiration.clone(), // Clone expiration here
         password: "".to_string(),
         title: "".to_string(),
     };
@@ -99,7 +106,7 @@ fn split_into_temp_files(data: &[u8], chunk_size: usize) -> Result<Vec<(PathBuf,
     Ok(temp_files)
 }
 
-async fn process_single_file(file_path: String) -> Result<(String, Vec<serde_json::Value>), String> {
+async fn process_single_file(file_path: String, expiration: String) -> Result<(String, Vec<serde_json::Value>), String> {
     // Read the file content
     let file_content = fs::read(&file_path).map_err(|e| format!("Failed to read file: {}", e.to_string()))?;
 
@@ -119,8 +126,9 @@ async fn process_single_file(file_path: String) -> Result<(String, Vec<serde_jso
         let client = Arc::clone(&client);
         let tx = tx.clone();
         let part_path = temp_path.to_string_lossy().to_string();
+        let expiration_clone = expiration.clone();
         let handle = tokio::spawn(async move {
-            upload_part(client, part_path, tx, index).await;
+            upload_part(client, part_path, tx, index, expiration_clone).await;
         });
         handles.push(handle);
     }
@@ -144,13 +152,13 @@ async fn process_single_file(file_path: String) -> Result<(String, Vec<serde_jso
     Ok((filename, formatted_links))
 }
 
-async fn upload_file_data_json() -> Result<String, String> {
+async fn upload_file_data_json(expiration: String) -> Result<String, String> {
     let client = Client::new();
     let file_content = fs::read_to_string("file_data.json").map_err(|e| e.to_string())?;
     let data = PartData {
         lang: "text".to_string(),
         text: file_content,
-        expire: "10m".to_string(),
+        expire: expiration, // Use the expiration parameter
         password: "".to_string(),
         title: "".to_string(),
     };
@@ -175,7 +183,7 @@ async fn upload_file_data_json() -> Result<String, String> {
     Err("Failed to upload file_data.json or parse the title".into())
 }
 
-fn update_history(title: &str, file_names: Vec<String>) -> Result<(), String> {
+fn update_history(title: &str, file_names: Vec<String>, expiration: String) -> Result<(), String> {
     let history_file = "history.json";
     let mut history: Vec<serde_json::Value> = if PathBuf::from(history_file).exists() {
         let file = File::open(history_file).map_err(|e| e.to_string())?;
@@ -184,15 +192,33 @@ fn update_history(title: &str, file_names: Vec<String>) -> Result<(), String> {
         vec![]
     };
 
+    let timestamp = Utc::now().to_rfc3339();
+
     history.push(serde_json::json!({
         "title": title,
         "file_names": file_names,
+        "expiration": expiration,
+        "timestamp": timestamp,
     }));
 
     let history_json = serde_json::to_string_pretty(&history).map_err(|e| e.to_string())?;
     fs::write(history_file, history_json).map_err(|e| e.to_string())?;
 
     Ok(())
+}
+
+fn calculate_expiration_time(timestamp: &str, expiration: &str) -> Result<DateTime<Utc>, String> {
+    let timestamp = DateTime::parse_from_rfc3339(timestamp).map_err(|e| e.to_string())?;
+    let duration = match expiration {
+        "-1" => Duration::seconds(i64::MAX),
+        "10m" => Duration::minutes(10),
+        "1h" => Duration::hours(1),
+        "1d" => Duration::days(1),
+        "14d" => Duration::days(14),
+        _ => return Err("Invalid expiration format".to_string()),
+    };
+
+    Ok((timestamp + duration).into())
 }
 
 async fn download_json(client: Arc<Client>, url: &str) -> Result<String, String> {
@@ -293,21 +319,28 @@ async fn download_and_rebuild_files(title: String) -> Result<(), String> {
     Ok(())
 }
 
-
 #[command]
-async fn process_files(file_paths: Vec<String>) -> Result<String, String> {
+async fn process_files(file_paths: Vec<String>, expiration: String) -> Result<String, String> {
     let mut all_files: HashMap<String, Vec<serde_json::Value>> = HashMap::new();
     let file_names: Vec<String> = file_paths.iter().map(|path| {
         PathBuf::from(path).file_name().unwrap().to_str().unwrap().to_string()
     }).collect();
 
-    for file_path in file_paths {
-        // Process each file separately
-        match process_single_file(file_path.clone()).await {
-            Ok((filename, links)) => {
+    let futures = file_paths.into_iter().map(|file_path| {
+        let expiration_clone = expiration.clone();
+        tokio::spawn(async move {
+            process_single_file(file_path, expiration_clone).await
+        })
+    });
+
+    let results: Vec<_> = join_all(futures).await;
+    for result in results {
+        match result {
+            Ok(Ok((filename, links))) => {
                 all_files.insert(filename, links);
-            },
-            Err(e) => return Err(e),
+            }
+            Ok(Err(e)) => return Err(e),
+            Err(e) => return Err(e.to_string()),
         }
     }
 
@@ -316,11 +349,11 @@ async fn process_files(file_paths: Vec<String>) -> Result<String, String> {
     fs::write("file_data.json", &file_data_json).expect("Failed to save file_data.json");
 
     // Upload file_data.json and get its title
-    let file_data_title = upload_file_data_json().await?;
+    let file_data_title = upload_file_data_json(expiration.clone()).await?;
     println!("file_data.json Response Title: {}", file_data_title);
 
     // Update history.json
-    update_history(&file_data_title, file_names)?;
+    update_history(&file_data_title, file_names, expiration)?;
 
     Ok(file_data_title)
 }
@@ -330,10 +363,36 @@ async fn rebuild_files(title: String) -> Result<(), String> {
     download_and_rebuild_files(title).await
 }
 
+// New endpoint to serve history.json
+#[command]
+async fn get_history() -> Result<String, String> {
+    let history_path = PathBuf::from("history.json");
+    let mut file = File::open(&history_path).map_err(|e| e.to_string())?;
+    let mut contents = String::new();
+    file.read_to_string(&mut contents).map_err(|e| e.to_string())?;
+    Ok(contents)
+}
+
+#[command]
+fn get_file_metadata(file_path: String) -> Result<FileMetadata, String> {
+    let metadata = std::fs::metadata(&file_path).map_err(|e| e.to_string())?;
+    let file_size = metadata.len();
+    let file_name = std::path::Path::new(&file_path)
+        .file_name()
+        .and_then(|name| name.to_str())
+        .ok_or_else(|| "Failed to get file name".to_string())?;
+    Ok(FileMetadata { name: file_name.to_string(), size: file_size })
+}
+
 fn main() {
     let _rt = Runtime::new().unwrap();
     Builder::default()
-        .invoke_handler(generate_handler![process_files, rebuild_files])
+        .invoke_handler(generate_handler![
+            process_files,
+            rebuild_files,
+            get_history,
+            get_file_metadata
+        ])
         .run(generate_context!())
         .expect("error while running tauri application");
 }
