@@ -1,17 +1,14 @@
 # GhostHost
 
-GhostHost is a Rust-based application designed to handle large file uploads by splitting them into smaller chunks, uploading each chunk to a remote server, and then providing the ability to rebuild the original files from the uploaded chunks. This ensures efficient and reliable file transfer, even for very large files. The application uses Tauri for the frontend, making it lightweight and easy to deploy.
+GhostHost is a Rust-based application that makes hosting or sharing files online free, whilst being easy to use and very quick!
 
-## Features
+It works by breaking down your file(s) into base64 and then creates 5mb "chunks" that will be uploaded onto GhostBin and you will receive a "code" that you can use to rebuild the files!
 
-- **Chunked File Uploads:** Splits large files into 1MB chunks and uploads each chunk individually.
-- **Base64 Encoding:** Encodes file content in Base64 before upload for safer transmission.
-- **Temporary Files:** Utilizes temporary files for intermediate storage during the upload process.
-- **JSON Metadata Management:** Maintains metadata about the uploaded files in JSON format.
-- **Rebuilding Files:** Supports downloading and rebuilding original files from uploaded chunks.
-- **History Management:** Keeps a history of uploaded files and their metadata.
+# Build from source
 
-## Prerequisites
+If you wish to build the application from source, follow the instructions below. 
+
+## Prerequisites 
 
 Before you begin, ensure you have met the following requirements:
 
@@ -67,12 +64,13 @@ Contributions are always welcome! If you have any suggestions or find a bug, ple
 
 5. Open a Pull Request
 
+## Contact
+
+[EMAIL](mailto:archways@gmx.us)
+
+[GITHUB REPO](https://github.com/archways404/GhostHost)
+
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
-## Contact
-
-[archways](mailto:archways@gmx.us)
-
-[Git](https://github.com/archways404/GhostHost)
