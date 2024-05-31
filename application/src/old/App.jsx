@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import FileSelector from './components/FileSelector';
-import FileList from './components/FileList';
-import UploadButton from './components/UploadButton';
-import RebuildFiles from './components/RebuildFiles';
-import StatusMessage from './components/StatusMessage';
+import FileSelector from '../components/old/FileSelector';
+import FileList from '../components/old/FileList';
+import UploadButton from '../components/old/UploadButton';
+import RebuildFiles from '../components/old/RebuildFiles';
+import StatusMessage from '../components/old/StatusMessage';
 import { Button } from '@/components/ui/button';
 import './App.css'; // Import CSS
 
