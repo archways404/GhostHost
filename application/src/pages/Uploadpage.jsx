@@ -21,6 +21,9 @@ function Uploadpage() {
 	const [files, setFiles] = useState([]);
 	const [loading, setLoading] = useState(false);
 	const [uploadStarted, setUploadStarted] = useState(false);
+	const [progress, setProgress] = useState(0);
+	const [code, setCode] = useState('');
+	const [expire, setExpire] = useState('-1');
 
 	const handleSelectFiles = async () => {
 		setLoading(true);
@@ -47,9 +50,22 @@ function Uploadpage() {
 		setFiles((prevFiles) => prevFiles.filter((file) => file.path !== filePath));
 	};
 
-	const handleUploadFiles = () => {
+	const handleUploadFiles = async () => {
 		setUploadStarted(true);
-		// Add your upload logic here
+		setProgress(0);
+		// Call the Tauri command to process files
+		try {
+			const response = await invoke('process_files', {
+				filePaths: files.map((file) => file.path),
+				expiration: expire,
+			});
+			console.log('Upload response:', response);
+			setCode(response);
+			// Update progress to 100% after successful upload
+			setProgress(100);
+		} catch (error) {
+			console.error('Error uploading files:', error);
+		}
 	};
 
 	const formatBytes = (bytes) => {
@@ -111,7 +127,7 @@ function Uploadpage() {
 										'Select Files'
 									)}
 								</Button>
-								<Select>
+								<Select onValueChange={(value) => setExpire(value)}>
 									<SelectTrigger className="w-[100px]">
 										<SelectValue placeholder="Expire" />
 									</SelectTrigger>
@@ -149,7 +165,11 @@ function Uploadpage() {
 						<>
 							<div className="mt-20 mb-20">
 								<p className="mb-4 text-center font-bold">Your code</p>
-								<Skeleton className="w-[200px] h-[20px] rounded-full" />
+								{code ? (
+									<p className="text-center text-2xl font-bold">{code}</p>
+								) : (
+									<Skeleton className="w-[200px] h-[20px] rounded-full" />
+								)}
 							</div>
 
 							<h3 className="text-xl mt-4 mb-4 text-center">
@@ -160,7 +180,7 @@ function Uploadpage() {
 								Uploading files...
 							</h3>
 							<Progress
-								value={33}
+								value={progress}
 								className="w-1/2 mt-4"
 							/>
 						</>
