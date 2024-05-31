@@ -64,22 +64,22 @@ function Navbar() {
 			<div className="flex space-x-6">
 				<Link
 					to="/"
-					className="text-black text-md px-3 py-2 rounded-full hover:bg-slate-200">
+					className="text-black font-bold text-md px-3 py-2 rounded-full hover:bg-slate-200">
 					Home
 				</Link>
 				<Link
-					to="/test"
-					className="text-black text-md px-3 py-2 rounded-full hover:bg-slate-200">
+					to="/upload"
+					className="text-black font-bold text-md px-3 py-2 rounded-full hover:bg-slate-200">
 					Upload
 				</Link>
 				<Link
 					to="/download"
-					className="text-black text-md px-3 py-2 rounded-full hover:bg-slate-200">
+					className="text-black font-bold text-md px-3 py-2 rounded-full hover:bg-slate-200">
 					Download
 				</Link>
 				<Link
 					to="/about"
-					className="text-black text-md px-3 py-2 rounded-full hover:bg-slate-200">
+					className="text-black font-bold text-md px-3 py-2 rounded-full hover:bg-slate-200">
 					About
 				</Link>
 				{/* Add more items as needed */}
