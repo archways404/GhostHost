@@ -118,9 +118,6 @@ function Uploadpage() {
 							</div>
 							{files.length > 0 && (
 								<div>
-									<h3 className="text-xl font-bold mt-4 text-center">
-										Total Size: {formatBytes(totalSize)}
-									</h3>
 									<Button
 										onClick={handleSelectFiles}
 										disabled={loading}>
@@ -133,6 +130,9 @@ function Uploadpage() {
 											'Upload Files'
 										)}
 									</Button>
+									<h3 className="text-xl font-bold mt-4 text-center">
+										Total Size: {formatBytes(totalSize)}
+									</h3>
 								</div>
 							)}
 							<Progress
