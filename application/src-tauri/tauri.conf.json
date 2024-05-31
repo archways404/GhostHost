@@ -30,7 +30,11 @@
 			{
 				"title": "GhostHost",
 				"width": 900,
-				"height": 800
+				"height": 800,
+				"resizable": false,
+				"fullscreen": false,
+				"decorations": true,
+				"transparent": true
 			}
 		],
 		"security": {
