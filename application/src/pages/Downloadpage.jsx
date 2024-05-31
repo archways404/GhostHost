@@ -3,6 +3,7 @@ import Navbar from '../components/Navbar';
 import DevDrawer from '../components/DevDrawer';
 import { invoke } from '@tauri-apps/api/tauri';
 import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import CountdownTimer from '../components/CountdownTimer';
 
 function Downloadpage() {
@@ -84,64 +85,74 @@ function Downloadpage() {
 					<Navbar />
 				</header>
 				<div className="flex-none p-4">
-					<h1 className="text-4xl pt-2 font-bold text-center">Rebuild Files</h1>
+					<h1 className="text-4xl pt-2 font-bold text-center">
+						Download and Rebuild Files
+					</h1>
 				</div>
 				<main className="flex-1 flex flex-col items-center p-4">
-					<div style={{ marginTop: '20px' }}>
-						<input
-							type="text"
-							value={rebuildTitle}
-							onChange={(e) => setRebuildTitle(e.target.value)}
-							placeholder="Enter response title"
-							className="mb-2 p-2 border rounded"
-						/>
-						<Button onClick={() => handleRebuild(rebuildTitle)}>
-							Rebuild Files
-						</Button>
+					<div className="w-full max-w-2xl mt-4">
+						<div className="flex justify-center mb-2">
+							<input
+								type="text"
+								value={rebuildTitle}
+								onChange={(e) => setRebuildTitle(e.target.value)}
+								placeholder="Enter code"
+								className="p-2 border rounded w-1/2 bg-black text-white"
+							/>
+							<Button
+								onClick={() => handleRebuild(rebuildTitle)}
+								className="ml-2">
+								Download
+							</Button>
+						</div>
 						{statusMessage && (
 							<p className="mt-2 text-center">{statusMessage}</p>
 						)}
-						<div className="history-cards mt-4">
-							{history.length > 0 ? (
-								history.map((entry, index) => (
-									<div
-										key={index}
-										className={`card ${
-											isExpired(entry.expiration, entry.timestamp)
-												? 'expired'
-												: ''
-										} p-4 mb-2 border rounded`}
-										onClick={() =>
-											!isExpired(entry.expiration, entry.timestamp) &&
-											handleRebuild(entry.title)
-										}
-										style={{
-											cursor: isExpired(entry.expiration, entry.timestamp)
-												? 'not-allowed'
-												: 'pointer',
-										}}>
-										<h3 className="font-bold">{entry.title}</h3>
-										<ul className="mb-2">
-											{entry.file_names.map((fileName, idx) => (
-												<li key={idx}>{fileName}</li>
-											))}
-										</ul>
-										<CountdownTimer
-											expiration={entry.expiration}
-											timestamp={entry.timestamp}
-											entryId={entry.id}
-											onHistoryUpdate={loadHistory}
-										/>
-										<Button
-											onClick={(event) => handleCopy(event, entry.title)}
-											className="mt-2">
-											Copy ID
-										</Button>
+						<div className="history-cards mt-4 w-full">
+							<ScrollArea className="h-[400px] w-full rounded-md p-1">
+								{history.length > 0 ? (
+									<div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+										{history.map((entry, index) => (
+											<div
+												key={index}
+												className={`card ${
+													isExpired(entry.expiration, entry.timestamp)
+														? 'expired'
+														: ''
+												} p-4 mb-2 border rounded`}
+												onClick={() =>
+													!isExpired(entry.expiration, entry.timestamp) &&
+													handleRebuild(entry.title)
+												}
+												style={{
+													cursor: isExpired(entry.expiration, entry.timestamp)
+														? 'not-allowed'
+														: 'pointer',
+												}}>
+												<h3 className="font-bold">{entry.title}</h3>
+												<ul className="mb-2">
+													{entry.file_names.map((fileName, idx) => (
+														<li key={idx}>{fileName}</li>
+													))}
+												</ul>
+												<CountdownTimer
+													expiration={entry.expiration}
+													timestamp={entry.timestamp}
+													entryId={entry.id}
+													onHistoryUpdate={loadHistory}
+												/>
+												<Button
+													onClick={(event) => handleCopy(event, entry.title)}
+													className="mt-2">
+													Copy ID
+												</Button>
+											</div>
+										))}
 									</div>
-								))
-							) : (
-								<p>No history available.</p>
-							)}
+								) : (
+									<p>No history available.</p>
+								)}
+							</ScrollArea>
 						</div>
 					</div>
 				</main>
