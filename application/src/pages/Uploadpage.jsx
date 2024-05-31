@@ -171,18 +171,22 @@ function Uploadpage() {
 									<Skeleton className="w-[200px] h-[20px] rounded-full" />
 								)}
 							</div>
+							{code ? (
+								<h3 className="text-xl mt-4 text-center">Upload complete!</h3>
+							) : (
+								<h3 className="text-xl font-bold mt-4 text-center">
+									Uploading...
+								</h3>
+							)}
 
-							<h3 className="text-xl mt-4 mb-4 text-center">
-								Total Size:{' '}
-								<span className="font-bold">{formatBytes(totalSize)}</span>
-							</h3>
-							<h3 className="text-xl font-bold mt-4 text-center">
-								Uploading files...
-							</h3>
 							<Progress
 								value={progress}
 								className="w-1/2 mt-4"
 							/>
+							<h3 className="text-xl mt-4 mb-4 text-center">
+								Total Size:{' '}
+								<span className="font-bold">{formatBytes(totalSize)}</span>
+							</h3>
 						</>
 					)}
 				</main>

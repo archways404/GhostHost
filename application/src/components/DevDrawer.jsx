@@ -19,7 +19,7 @@ function DevDrawer() {
 			<div className="flex space-x-6 text-sm pb-1">
 				<Drawer>
 					<DrawerTrigger>
-						<div className="hover:text-green-500">Credits</div>
+						<div className="text-slate-400 hover:text-white">Credits</div>
 					</DrawerTrigger>
 					<DrawerContent>
 						<DrawerHeader>
@@ -45,7 +45,9 @@ function DevDrawer() {
 				</Drawer>
 				<Drawer>
 					<DrawerTrigger>
-						<div className="hover:text-green-500">Terms & Conditions</div>
+						<div className="text-slate-400 hover:text-white">
+							Terms and Conditions
+						</div>
 					</DrawerTrigger>
 					<DrawerContent>
 						<DrawerHeader>
@@ -121,7 +123,7 @@ function DevDrawer() {
 				</Drawer>
 			</div>
 			<Separator className="w-2/5" />
-			<p className="text-center text-sm pt-1">
+			<p className="text-center text-slate-400 text-sm pt-1">
 				© 2024 Software404™. All Rights Reserved.
 			</p>
 		</div>
