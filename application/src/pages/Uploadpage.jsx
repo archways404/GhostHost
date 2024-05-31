@@ -15,10 +15,12 @@ import {
 } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Skeleton } from '@/components/ui/skeleton';
 
 function Uploadpage() {
 	const [files, setFiles] = useState([]);
 	const [loading, setLoading] = useState(false);
+	const [uploadStarted, setUploadStarted] = useState(false);
 
 	const handleSelectFiles = async () => {
 		setLoading(true);
@@ -45,6 +47,11 @@ function Uploadpage() {
 		setFiles((prevFiles) => prevFiles.filter((file) => file.path !== filePath));
 	};
 
+	const handleUploadFiles = () => {
+		setUploadStarted(true);
+		// Add your upload logic here
+	};
+
 	const formatBytes = (bytes) => {
 		if (bytes === 0) return '0 Bytes';
 		const k = 1024;
@@ -65,32 +72,33 @@ function Uploadpage() {
 					<h1 className="text-4xl pt-2 font-bold text-center">Upload files</h1>
 				</div>
 				<main className="flex-1 flex flex-col items-center p-4">
-					{files.length > 0 && (
-						<div className="w-full max-w-4xl">
-							<ScrollArea className="h-[300px] w-[full] rounded-md p-1">
-								<div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-									{files.map((file, index) => (
-										<div
-											key={index}
-											className="mb-1 flex justify-between items-center p-1 bg-slate-800 border rounded">
-											<span>
-												<strong>{file.name}</strong> ({formatBytes(file.size)})
-											</span>
-											<Button
-												variant="outline"
-												className="ml-4 bg-slate-800 hover:bg-red-500"
-												onClick={() => handleDeleteFile(file.path)}>
-												<Trash2 className="h-4 w-4" />
-											</Button>
+					{!uploadStarted ? (
+						<>
+							{files.length > 0 && (
+								<div className="w-full max-w-4xl">
+									<ScrollArea className="h-[300px] w-full rounded-md p-1">
+										<div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+											{files.map((file, index) => (
+												<div
+													key={index}
+													className="mb-1 flex justify-between items-center p-1 bg-slate-800 border rounded">
+													<span>
+														<strong>{file.name}</strong> (
+														{formatBytes(file.size)})
+													</span>
+													<Button
+														variant="outline"
+														className="ml-4 bg-slate-800 hover:bg-red-500"
+														onClick={() => handleDeleteFile(file.path)}>
+														<Trash2 className="h-4 w-4" />
+													</Button>
+												</div>
+											))}
 										</div>
-									))}
+									</ScrollArea>
 								</div>
-							</ScrollArea>
-						</div>
-					)}
-					<div className="flex-1 flex flex-col justify-end items-center w-full">
-						<div className="w-full max-w-4xl flex flex-col items-center space-y-4">
-							<div className="flex space-x-4">
+							)}
+							<div className="flex space-x-4 mt-4">
 								<Button
 									onClick={handleSelectFiles}
 									disabled={loading}>
@@ -117,10 +125,14 @@ function Uploadpage() {
 								</Select>
 							</div>
 							{files.length > 0 && (
-								<div>
+								<div className="mt-4">
+									<h3 className="text-xl font-bold text-center">
+										Total Size: {formatBytes(totalSize)}
+									</h3>
 									<Button
-										onClick={handleSelectFiles}
-										disabled={loading}>
+										onClick={handleUploadFiles}
+										disabled={loading}
+										className="mt-4">
 										{loading ? (
 											<>
 												<Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -130,17 +142,29 @@ function Uploadpage() {
 											'Upload Files'
 										)}
 									</Button>
-									<h3 className="text-xl font-bold mt-4 text-center">
-										Total Size: {formatBytes(totalSize)}
-									</h3>
 								</div>
 							)}
+						</>
+					) : (
+						<>
+							<div className="mt-20 mb-20">
+								<p className="mb-4 text-center font-bold">Your code</p>
+								<Skeleton className="w-[200px] h-[20px] rounded-full" />
+							</div>
+
+							<h3 className="text-xl mt-4 mb-4 text-center">
+								Total Size:{' '}
+								<span className="font-bold">{formatBytes(totalSize)}</span>
+							</h3>
+							<h3 className="text-xl font-bold mt-4 text-center">
+								Uploading files...
+							</h3>
 							<Progress
 								value={33}
-								className="w-full"
+								className="w-1/2 mt-4"
 							/>
-						</div>
-					</div>
+						</>
+					)}
 				</main>
 				<footer className="flex-none py-2">
 					<DevDrawer />
