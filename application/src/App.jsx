@@ -4,6 +4,7 @@ import FileList from './components/FileList';
 import UploadButton from './components/UploadButton';
 import RebuildFiles from './components/RebuildFiles';
 import StatusMessage from './components/StatusMessage';
+import { Button } from '@/components/ui/button';
 import './App.css'; // Import CSS
 
 function App() {
@@ -19,18 +20,18 @@ function App() {
 	const renderHomeScreen = () => (
 		<div className="home-screen">
 			<h1 className="cool-title">GhostHost</h1>
-			<button onClick={() => setView('upload')}>Upload File(s)</button>
-			<button onClick={() => setView('rebuild')}>Rebuild File(s)</button>
+			<Button onClick={() => setView('upload')}>Upload File(s)</Button>
+			<Button onClick={() => setView('rebuild')}>Rebuild File(s)</Button>
 		</div>
 	);
 
 	const renderUploadScreen = () => (
 		<div className="upload-screen">
-			<button
+			<Button
 				className="back-button"
 				onClick={() => setView('home')}>
 				Back to Home
-			</button>
+			</Button>
 			<h1>File Upload</h1>
 			<div className="container">
 				<div className="section">
@@ -57,11 +58,11 @@ function App() {
 
 	const renderRebuildScreen = () => (
 		<div className="rebuild-screen">
-			<button
+			<Button
 				className="back-button"
 				onClick={() => setView('home')}>
 				Back to Home
-			</button>
+			</Button>
 			<h1>Rebuild Files</h1>
 			<div className="container">
 				<div className="section">

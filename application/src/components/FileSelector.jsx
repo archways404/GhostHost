@@ -1,6 +1,7 @@
 import React from 'react';
 import { open } from '@tauri-apps/api/dialog';
 import { invoke } from '@tauri-apps/api/tauri';
+import { Button } from '@/components/ui/button';
 
 function FileSelector({ setFiles }) {
 	const handleSelectFiles = async () => {
@@ -24,7 +25,7 @@ function FileSelector({ setFiles }) {
 
 	return (
 		<div>
-			<button onClick={handleSelectFiles}>Select Files</button>
+			<Button onClick={handleSelectFiles}>Select Files</Button>
 		</div>
 	);
 }
