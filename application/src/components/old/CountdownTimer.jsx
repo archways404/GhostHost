@@ -34,7 +34,6 @@ function CountdownTimer({ expiration, timestamp }) {
 	}, [expiration, timestamp]);
 
 	const parseDuration = (duration) => {
-		if (!duration) return null;
 		const value = parseInt(duration.slice(0, -1), 10);
 		switch (duration.slice(-1)) {
 			case 'm':
